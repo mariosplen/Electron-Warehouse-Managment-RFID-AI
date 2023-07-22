@@ -1,0 +1,6 @@
+train: ../small_dataset/train/images
+val: ../small_dataset/valid/images
+test: ../small_dataset/test/images
+
+nc: 1
+names: [ 'Carton' ]
