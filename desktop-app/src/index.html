@@ -1,37 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Object detector</title>
+  <meta charset="UTF-8"/>
+  <title>Hello World!</title>
+
 </head>
 <body>
-<video controls id="videoElement" style="display:none"></video>
-<br/>
-<canvas></canvas>
-<br/>
-<button id="play">Play</button>&nbsp;
-<button id="pause">Pause</button>
-<script defer src="object_detector.js" type="module"></script>
-<script>
-
-    // Get references to the video and canvas elements
-    const videoElement = document.getElementById('videoElement');
-    const canvas = document.querySelector('canvas');
-    const context = canvas.getContext('2d');
-
-    // Function to start the webcam feed
-    async function startWebcam() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({video: true});
-            videoElement.srcObject = stream;
-        } catch (err) {
-            console.error('Error accessing webcam: ', err);
-        }
-    }
-
-    // Start the webcam when the page loads
-    window.onload = startWebcam;
-
-</script>
+<div id="root"></div>
 </body>
 </html>
