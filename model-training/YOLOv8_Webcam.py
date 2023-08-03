@@ -1,6 +1,6 @@
+import cv2
 import math
 from ultralytics import YOLO
-import cv2
 
 cap = cv2.VideoCapture(2)
 
