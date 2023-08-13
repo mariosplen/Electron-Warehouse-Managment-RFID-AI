@@ -8,7 +8,7 @@ import labels from "./labels.json";
  * @param {Array} classes_data class array
  * @param {Array[Number]} ratios boxes ratio [xRatio, yRatio]
  */
-export const renderBoxes = (canvasRef, boxes_data, scores_data, classes_data, ratios) => {
+export const renderBoxes = (canvasRef, boxes_data, scores_data, classes_data, ratios, widthScale, heightScale) => {
 	const ctx = canvasRef.getContext("2d");
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clean canvas
 
@@ -63,7 +63,7 @@ export const renderBoxes = (canvasRef, boxes_data, scores_data, classes_data, ra
 
 		// Draw labels
 		ctx.fillStyle = "#ffffff";
-		ctx.fillText(klass + " - " + score + "%", x1 - 1, yText < 0 ? 0 : yText);
+		ctx.fillText(`w:${(width * widthScale).toFixed(2)}mm,h:${(height * heightScale).toFixed(2)}mm`, x1 - 1, yText < 0 ? 0 : yText);
 	}
 };
 

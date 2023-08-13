@@ -46,10 +46,10 @@ const preprocess = (source, modelWidth, modelHeight) => {
  * @param {HTMLCanvasElement} canvasRef canvas reference
  * @param {VoidFunction} callback function to run after detection process
  */
-export const detect = async (source, model, canvasRef, callback = () => {
+export const detect = async (source, model, canvasRef, widthScale, heightScale, callback = () => {
 }) => {
 	const [modelWidth, modelHeight] = model.inputShape.slice(1, 3); // get model width and height
-
+	console.log("runned")
 	tf.engine().startScope(); // start scoping tf engine
 	const [input, xRatio, yRatio] = preprocess(source, modelWidth, modelHeight); // preprocess image
 
@@ -85,7 +85,7 @@ export const detect = async (source, model, canvasRef, callback = () => {
 	const scores_data = scores.gather(nms, 0).dataSync(); // indexing scores by nms index
 	const classes_data = classes.gather(nms, 0).dataSync(); // indexing classes by nms index
 
-	renderBoxes(canvasRef, boxes_data, scores_data, classes_data, [xRatio, yRatio]); // render boxes
+	renderBoxes(canvasRef, boxes_data, scores_data, classes_data, [xRatio, yRatio], widthScale, heightScale); // render boxes
 	tf.dispose([res, transRes, boxes, scores, classes, nms]); // clear memory
 
 	callback();
@@ -99,7 +99,7 @@ export const detect = async (source, model, canvasRef, callback = () => {
  * @param {tf.GraphModel} model loaded YOLOv8 tensorflow.js model
  * @param {HTMLCanvasElement} canvasRef canvas reference
  */
-export const detectVideo = (vidSource, model, canvasRef) => {
+export const detectVideo = (vidSource, model, canvasRef, widthScale, heightScale) => {
 	/**
 	 * Function to detect every frame from video
 	 */
@@ -110,7 +110,8 @@ export const detectVideo = (vidSource, model, canvasRef) => {
 			return; // handle if source is closed
 		}
 
-		detect(vidSource, model, canvasRef, () => {
+		detect(vidSource, model, canvasRef, widthScale, heightScale, () => {
+
 			requestAnimationFrame(detectFrame); // get another frame
 		});
 	};
