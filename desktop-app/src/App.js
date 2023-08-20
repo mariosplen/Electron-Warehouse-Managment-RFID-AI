@@ -3,129 +3,111 @@ import "@tensorflow/tfjs-backend-webgl"; // set backend to webgl
 import loadModel from "./utils/loadModel";
 import getAvailableCameras from "./utils/getAvailableCameras";
 import "./styles/App.css";
-import {detectVideo} from "./utils/detect";
+import {runModelLoop} from "./utils/runModels";
 import setCameraRefSource from "./utils/setCameraRefSource";
 import CameraChooser from "./components/CameraChooser";
-import {arucoStart} from "./testAruco";
 
 
 const App = () => {
-	const [isModelLoading, setIsModelLoading] = useState({loading: true, progress: 0});
-	const [availableCameras, setAvailableCameras] = useState([]);
-	const [selectedCamera, setSelectedCamera] = useState(null);
-	const [widthScale, setWidthScale] = useState("0.5");
-	const [heightScale, setHeightScale] = useState("0.5");
-	const [model, setModel] = useState({
-		net: null,
-		inputShape: [1, 0, 0, 3],
-	});
+
+    const [availableCameras, setAvailableCameras] = useState([]);
+    const [selectedCamera, setSelectedCamera] = useState(null);
 
 
-	const cameraRef = useRef(null);
-	const canvasRef = useRef(null);
-
-	const modelName = "carton";
-
-	const resourcePath =
-		!process.env.NODE_ENV || process.env.NODE_ENV === "production"
-			? process.resourcesPath // Prod mode
-			: `https://raw.githubusercontent.com/mariosplen/Carton-Scanner-RFID/master/desktop-app`; // Dev mode
-
-	const modelPath = `${resourcePath}/assets/${modelName}_web_model/model.json`;
+    const [isODModelLoading, setIsODModelLoading] = useState({
+        loading: false,
+        progress: 0
+    });
+    const [model, setModel] = useState({
+        net: null,
+        inputShape: [1, 0, 0, 3],
+    });
 
 
-	// Load model
-	useEffect(() => {
-		loadModel(modelPath, setIsModelLoading, setModel);
-	}, []);
+    const cameraRef = useRef(null);
+    const canvasRef = useRef(null);
+    const modelsLoopToggleRef = useRef(false);
 
-	// Get available cameras
-	useEffect(() => {
-		getAvailableCameras(setAvailableCameras);
-	}, []);
+    const modelName = "carton";
 
-	// Set default selected camera when available cameras change
-	useEffect(() => {
-		if (availableCameras.length > 0) {
-			setSelectedCamera(availableCameras[0]);
-		}
-	}, [availableCameras]);
+    const resourcePath =
+        !process.env.NODE_ENV || process.env.NODE_ENV === "production"
+            ? process.resourcesPath // Prod mode
+            : `https://raw.githubusercontent.com/mariosplen/Carton-Scanner-RFID/master/desktop-app`; // Dev mode
 
-	// Set the cameraRef stream source to the selected camera
-	useEffect(() => {
-		if (selectedCamera !== null) {
-			setCameraRefSource(cameraRef, selectedCamera)
-		}
-	}, [selectedCamera]);
+    const modelPath = `${resourcePath}/assets/${modelName}_web_model/model.json`;
 
 
-	return (
-		<div className="App">
-			<>
+    // Load model
+    useEffect(() => {
+        loadModel(modelPath, setIsODModelLoading, setModel);
+    }, []);
 
-				<input type="range" min="0.00001" max="1" step="0.00001"
-				       value={widthScale}
-				       onChange={e => {
-					       setWidthScale(e.target.value)
-				       }
-				       }
-				/>
-				<p>{Number(widthScale).toFixed(5)}</p>
-				<input type="range" min="0.00001" max="1" step="0.00001"
-				       value={heightScale}
-				       onChange={e => {
-					       setHeightScale(e.target.value)
-				       }
-				       }
-				/>
-				<p>{Number(heightScale).toFixed(5)}</p>
+    // Get available cameras
+    useEffect(() => {
+        getAvailableCameras(setAvailableCameras);
+    }, []);
 
+    // Set default selected camera when available cameras change
+    useEffect(() => {
+        if (availableCameras.length <= 0) {
+            return
+        }
+        // Check if selected camera's id is equal in a camera id in available cameras
+        if (selectedCamera !== null && availableCameras.some((camera) => camera.deviceId === selectedCamera.deviceId)) {
+            return
+        }
 
-				<button onClick={() => {
+        setSelectedCamera(availableCameras[0]);
+    }, [availableCameras]);
 
-					arucoStart(cameraRef, (widthScale, heightScale) => {
-						setHeightScale(heightScale)
-						setWidthScale(widthScale)
-					})
-				}}>
-					print markers on console
-				</button>
-				{isModelLoading.loading && <p>Loading model... {(isModelLoading.progress * 100).toFixed(2)}%</p>}
-				{!isModelLoading.loading && <button
-					onClick={
-						() => {
-							detectVideo(cameraRef.current, model, canvasRef.current, widthScale, heightScale)
-						}
-					}> Detect
-				</button>}
-				{!isModelLoading.loading && <button
-					onClick={
-						() => {
-							const url = canvasRef.current.src;
-							canvasRef.current.src = ""; // restore video source
-							URL.revokeObjectURL(url); // revoke url
+    // Set the cameraRef stream source to the selected camera
+    useEffect(() => {
+        if (selectedCamera !== null) {
+            setCameraRefSource(cameraRef, selectedCamera)
+        }
+    }, [selectedCamera]);
 
 
-							cameraRef.current.value = ""; // reset input video
-							cameraRef.current.style.display = "none"; // hide video
-						}
-					}>Stop Detect
-				</button>}
+    return (
+        <div className="App">
+            <>
+                {isODModelLoading.loading && <p>Loading model... {(isODModelLoading.progress * 100).toFixed(2)}%</p>}
+                {!isODModelLoading.loading && <button
+                    onClick={
+                        () => {
+                            modelsLoopToggleRef.current = true;
+                            runModelLoop(cameraRef.current, model, canvasRef.current, modelsLoopToggleRef)
+                        }
+                    }> Start
+                </button>}
+                {!isODModelLoading.loading && <button
+                    onClick={
+                        () => {
+                            modelsLoopToggleRef.current = false;
+                        }
+                    }>Stop
+                </button>}
 
-				<CameraChooser availableCameras={availableCameras} selectedCamera={selectedCamera}
-				               setSelectedCamera={setSelectedCamera}/>
+                <CameraChooser availableCameras={availableCameras} selectedCamera={selectedCamera}
+                               setSelectedCamera={setSelectedCamera}/>
+                <button onClick={() => {
+                    getAvailableCameras(setAvailableCameras)
+                }}>
+                    Refresh Camera List
+                </button>
 
-				<div className="content">
-					<video
-						autoPlay
-						muted
-						ref={cameraRef}
-					/>
-					<canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef}/>
-				</div>
-			</>
-		</div>
-	);
+                <div className="content">
+                    <video
+                        autoPlay
+                        muted
+                        ref={cameraRef}
+                    />
+                    <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef}/>
+                </div>
+            </>
+        </div>
+    );
 };
 
 export default App;
