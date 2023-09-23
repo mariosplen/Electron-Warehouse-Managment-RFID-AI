@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+
+const BarnowlLlrp = require("../lib/barnowlllrp.js");
+
+if (process.argv.length <= 2) {
+  return console.log(
+    "This script requires the IP address of the reader.  Try running again with an IP address parameter (ex: npm start xxx.xxx.xxx.xxx)."
+  );
+}
+
+let host = process.argv[2];
+
+let barnowl = new BarnowlLlrp();
+
+barnowl.addListener(BarnowlLlrp.TcpSocketListener, { host: host });
+
+barnowl.on("raddec", (raddec) => {
+  console.log(raddec.toFlattened());
+});

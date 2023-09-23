@@ -6,7 +6,9 @@ import { MakerRpm } from "@electron-forge/maker-rpm";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 
 const config: ForgeConfig = {
-  packagerConfig: {},
+  packagerConfig: {
+    // extraResource: ["./resources/model"], TODO: CHECK THIS OUT
+  },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({}),

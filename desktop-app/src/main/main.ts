@@ -1,34 +1,40 @@
-import { app, BrowserWindow } from "electron";
-import path from "path";
+import { app, BrowserWindow, ipcMain } from "electron";
+import runOSSpecificCode from "./os-specific";
 
-let mainWindow: BrowserWindow = null;
+runOSSpecificCode(app);
+
+const isDev: boolean = MAIN_WINDOW_VITE_DEV_SERVER_URL !== undefined;
+
+let win: BrowserWindow = null;
+
 app.on("ready", () => {
-  mainWindow = new BrowserWindow({
+  win = new BrowserWindow({
     show: false,
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: `${__dirname}/preload.js`,
       nodeIntegration: true,
+      // webSecurity: false,
+      contextIsolation: false,
     },
   });
 
-  // load the index.html of the app.
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    // in development mode
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
-    mainWindow.webContents.openDevTools();
-  } else {
-    // in production mode
-    mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
-    );
-  }
+  isDev
+    ? win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/index.html`)
+    : win.loadFile(
+        `${__dirname}/../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`
+      );
 
-  mainWindow.once("ready-to-show", () => {
-    mainWindow.show();
+  isDev ? win.webContents.openDevTools() : win.webContents.closeDevTools();
+
+  win.on("ready-to-show", () => win.show());
+
+  ipcMain.on("r2m-connected-to-reader", () => {
+    win.webContents.send("m2r-connected-to-reader");
+  });
+
+  ipcMain.on("r2m-disconnected-from-reader", () => {
+    win.webContents.send("m2r-disconnected-from-reader");
   });
 });
-
-import runOSSpecificCode from "./misc/os-specific";
-runOSSpecificCode(app);
