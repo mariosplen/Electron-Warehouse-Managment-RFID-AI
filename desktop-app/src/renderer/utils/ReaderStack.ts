@@ -1,12 +1,12 @@
 import { RaddecReading } from "../types/RaddecReading";
 
 export class ReaderStack {
-  constructor(private items: RaddecReading[], seconds: number) {
-    this.removeOldReadingsInterval(seconds);
+  constructor(private items: RaddecReading[], garbageCollector: number) {
+    this.removeOldReadingsInterval(garbageCollector);
   }
 
-  get(): RaddecReading[] {
-    return this.items;
+  get(oldestItemInSeconds: number): RaddecReading[] {
+    return this.getLastReading(oldestItemInSeconds);
   }
 
   push(newItem: RaddecReading): void {
@@ -19,7 +19,7 @@ export class ReaderStack {
     this.items.push(newItem);
   }
 
-  removeOld(seconds: number): void {
+  private removeOld(seconds: number): void {
     const now = new Date().getTime();
 
     for (let i = this.items.length - 1; i >= 0; i--) {
@@ -34,5 +34,11 @@ export class ReaderStack {
     setInterval(() => {
       this.removeOld(seconds);
     }, seconds * 1000);
+  }
+
+  // todo: need to test this
+  private getLastReading(seconds: number): RaddecReading[] {
+    const now = new Date().getTime();
+    return this.items.filter((item) => item.timestamp > now - seconds * 1000);
   }
 }

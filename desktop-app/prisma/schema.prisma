@@ -10,7 +10,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Item {
-  id   Int    @id @default(autoincrement())
-  name String
+model Box {
+  id        Int      @id @default(autoincrement())
+  uid       String   @unique
+  contents  String
+  isFragile Boolean
+  weight    Int // in kilograms
+  length    Int // in centimeters
+  width     Int
+  height    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Pallet {
+  id        Int      @id @default(autoincrement())
+  uid       String   @unique
+  contents  String
+  maxWeight Int // in kilograms
+  area      Int // in square meters
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

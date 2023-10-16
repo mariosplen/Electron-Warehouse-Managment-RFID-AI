@@ -39,20 +39,34 @@ app.on("ready", () => {
     win.webContents.send("m2r-disconnected-from-reader");
   });
 
-  ipcMain.on("add-demo-data", async (event) => {
-    const data = await prisma.item.create({
+  ipcMain.on("add-box", async (event, box) => {
+    console.log("received add-box event");
+    const data = await prisma.box.create({
       data: {
-        name: "Alice",
+        uid: box.uid,
+        contents: box.contents,
+        isFragile: box.isFragile,
+        weight: box.weight,
+        length: box.length,
+        width: box.width,
+        height: box.height,
       },
     });
-    console.log("data added data:", data);
+    const dbData = await prisma.box.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
+    console.log("data:", dbData);
+    win.webContents.send("box-added", dbData);
+    console.log("sent box-added event");
   });
 
-  ipcMain.on("get-all-users", async (event) => {
-    console.log("received get-all-users event");
-    const data = await prisma.item.findMany();
-    console.log("data:", data);
-    win.webContents.send("all-users", data);
-    console.log("sent all-users event");
-  });
+  // ipcMain.on("get-all-users", async (event) => {
+  //   console.log("received get-all-users event");
+  //   const data = await prisma.item.findMany();
+  //   console.log("data:", data);
+  //   win.webContents.send("all-users", data);
+  //   console.log("sent all-users event");
+  // });
 });

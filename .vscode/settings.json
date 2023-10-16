@@ -1,0 +1,11 @@
+{
+  "sqltools.useNodeRuntime": true,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "testconnection",
+      "database": "${workspaceFolder:Warehouse-Managment-RFID-AI}/desktop-app/prisma/dev.db"
+    }
+  ]
+}

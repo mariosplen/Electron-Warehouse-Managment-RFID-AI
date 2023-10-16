@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "mariosplen",
+    "name": "Marios Plenchidis",
     "email": "mariosplenchidis@gmail.com"
   },
   "license": "MIT",
@@ -25,11 +25,11 @@
     "@electron-forge/maker-zip": "^6.4.2",
     "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
     "@electron-forge/plugin-vite": "^6.4.2",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react": "^18.2.28",
+    "@types/react-dom": "^18.2.13",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "electron": "^26.2.1",
+    "electron": "27.0.0",
     "eslint": "^8.0.1",
     "eslint-plugin-import": "^2.25.0",
     "prisma": "^5.4.2",
@@ -43,7 +43,8 @@
     "bootstrap": "^5.3.2",
     "electron-squirrel-startup": "^1.0.0",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.8.0",
-    "react-dom": "^18.2.0"
+    "react-bootstrap": "^2.9.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.16.0"
   }
 }
